@@ -502,6 +502,16 @@ class NeuralynxRawIO(BaseRawIO):
                              offset=NlxHeader.HEADER_SIZE)
             nlxHeader = NlxHeader(ncs_filename)
 
+            if 'DspFilterDelay_µs' in nlxHeader.keys() and 'DspDelayCompensation' in nlxHeader.keys():
+                dps_delay = int(nlxHeader['DspFilterDelay_µs'])
+                if nlxHeader['DspDelayCompensation'] == 'Enabled':
+                    dsp_compensation = True
+                elif nlxHeader['DspDelayCompensation'] == 'Disabled':
+                    dsp_compensation = False
+                else:
+                    raise ValueError(f'not recognized: {nlxHeader["DspDelayCompensation"]}')  # TODO make this pretty
+                assert dps_delay == 0 or dsp_compensation, f'DSP filter caused a lag, not compensated for by cheetah'  # TODO also make this pretty
+
             if not chanSectMap or (chanSectMap and
                                     not NcsSectionsFactory._verifySectionsStructure(data,
                                                                                 lastNcsSections)):

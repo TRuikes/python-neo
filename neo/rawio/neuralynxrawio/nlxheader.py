@@ -215,9 +215,13 @@ class NlxHeader(OrderedDict):
 
         # close time, if available
         if 'datetime2_regex' in hpd:
-            dt2 = re.search(hpd['datetime2_regex'], txt_header).groupdict()
-            self['recording_closed'] = datetime.datetime.strptime(
-                dt2['date'] + ' ' + dt2['time'], hpd['datetimeformat'])
+            dt2 = re.search(hpd['datetime2_regex'], txt_header)  # can be none
+            if dt2 is not None:
+                dt2 = dt2.groupdict()
+                self['recording_closed'] = datetime.datetime.strptime(
+                    dt2['date'] + ' ' + dt2['time'], hpd['datetimeformat'])
+            else:
+                self['recording_closed'] = None  # TODO: default type?
 
     def type_of_recording(self):
         """
